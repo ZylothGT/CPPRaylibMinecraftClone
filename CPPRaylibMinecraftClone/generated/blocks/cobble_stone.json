@@ -1,0 +1,95 @@
+{
+    "name": "cobble_stone",
+    "textures": {
+        "top": {
+            "atlasTexture": "texture_0",
+            "pixel": {
+                "x": 8,
+                "y": 8,
+                "width": 16,
+                "height": 16
+            },
+            "uv": {
+                "u0": 0.08333333333333333,
+                "v0": 0.125,
+                "u1": 0.25,
+                "v1": 0.375
+            }
+        },
+        "bottom": {
+            "atlasTexture": "texture_0",
+            "pixel": {
+                "x": 8,
+                "y": 8,
+                "width": 16,
+                "height": 16
+            },
+            "uv": {
+                "u0": 0.08333333333333333,
+                "v0": 0.125,
+                "u1": 0.25,
+                "v1": 0.375
+            }
+        },
+        "north": {
+            "atlasTexture": "texture_0",
+            "pixel": {
+                "x": 8,
+                "y": 8,
+                "width": 16,
+                "height": 16
+            },
+            "uv": {
+                "u0": 0.08333333333333333,
+                "v0": 0.125,
+                "u1": 0.25,
+                "v1": 0.375
+            }
+        },
+        "south": {
+            "atlasTexture": "texture_0",
+            "pixel": {
+                "x": 8,
+                "y": 8,
+                "width": 16,
+                "height": 16
+            },
+            "uv": {
+                "u0": 0.08333333333333333,
+                "v0": 0.125,
+                "u1": 0.25,
+                "v1": 0.375
+            }
+        },
+        "east": {
+            "atlasTexture": "texture_0",
+            "pixel": {
+                "x": 8,
+                "y": 8,
+                "width": 16,
+                "height": 16
+            },
+            "uv": {
+                "u0": 0.08333333333333333,
+                "v0": 0.125,
+                "u1": 0.25,
+                "v1": 0.375
+            }
+        },
+        "west": {
+            "atlasTexture": "texture_0",
+            "pixel": {
+                "x": 8,
+                "y": 8,
+                "width": 16,
+                "height": 16
+            },
+            "uv": {
+                "u0": 0.08333333333333333,
+                "v0": 0.125,
+                "u1": 0.25,
+                "v1": 0.375
+            }
+        }
+    }
+}
