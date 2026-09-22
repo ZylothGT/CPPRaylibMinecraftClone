@@ -193,6 +193,11 @@ int main(void)
         float moveSpeed =
             10.0f * dt;
 
+        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+        {
+            moveSpeed *= 5;
+        }
+
 
         if (IsKeyDown(KEY_W))
         {

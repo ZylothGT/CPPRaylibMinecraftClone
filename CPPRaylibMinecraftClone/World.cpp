@@ -9,6 +9,10 @@
 #include <algorithm>
 #include <cstdint>
 #include <unordered_set>
+#include <random>
+#include <chrono>
+
+uint32_t worldSeed = 0;
 
 using json = nlohmann::json;
 
@@ -263,7 +267,8 @@ static float Hash2D(int x, int z)
 {
     uint32_t h =
         static_cast<uint32_t>(x) * 374761393u +
-        static_cast<uint32_t>(z) * 668265263u;
+        static_cast<uint32_t>(z) * 668265263u +
+        worldSeed;
 
     h = (h ^ (h >> 13)) * 1274126177u;
     h ^= h >> 16;
@@ -424,6 +429,22 @@ void BuildBlockLookup()
 void SetupWorld()
 {
     blocks.clear();
+
+    std::random_device rd;
+
+    worldSeed =
+        rd() ^
+        static_cast<uint32_t>(
+            std::chrono::high_resolution_clock::now()
+            .time_since_epoch()
+            .count()
+            );
+
+    TraceLog(
+        LOG_INFO,
+        "World Seed: %u",
+        worldSeed
+    );
 
     LoadBlockTextures();
 
