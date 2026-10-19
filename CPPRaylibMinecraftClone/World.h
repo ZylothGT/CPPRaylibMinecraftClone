@@ -10,7 +10,6 @@ const int CHUNK_SIZE = 16;
 struct Chunk
 {
     int x;
-    int y;
     int z;
 
     Mesh mesh = { 0 };
@@ -34,7 +33,7 @@ RaycastHit RaycastBlock(
     float maxDistance
 );
 
-Chunk* GetChunkAt(int chunkX, int chunkY, int chunkZ);
+Chunk* GetChunkAt(int chunkX, int chunkZ);
 Chunk* GetChunkContainingBlock(Vector3 position);
 
 void CreateChunks();

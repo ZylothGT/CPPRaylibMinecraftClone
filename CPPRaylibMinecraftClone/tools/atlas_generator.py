@@ -19,7 +19,7 @@ ATLAS_FILE = "blocks_atlas.png"
 ATLAS_JSON = "atlas.json"
 
 # Pixels around every texture for mipmap padding
-PADDING = 8
+PADDING = 16
 
 # Empty tiles around the outside of the atlas
 ATLAS_BORDER_TILES = 0

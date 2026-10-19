@@ -16,6 +16,9 @@ uint32_t worldSeed = 0;
 
 using json = nlohmann::json;
 
+const int MIN_BUILD_Y = -10;
+const int MAX_BUILD_Y = 365;
+
 struct BlockKey
 {
     int x;
@@ -175,12 +178,11 @@ int GetLocalBlockCoordinate(float position)
 // GET CHUNK
 // =====================================================
 
-Chunk* GetChunkAt(int chunkX, int chunkY, int chunkZ)
+Chunk* GetChunkAt(int chunkX, int chunkZ)
 {
     for (Chunk& chunk : chunks)
     {
         if (chunk.x == chunkX &&
-            chunk.y == chunkY &&
             chunk.z == chunkZ)
         {
             return &chunk;
@@ -194,17 +196,15 @@ Chunk* GetChunkAt(int chunkX, int chunkY, int chunkZ)
 Chunk* GetChunkContainingBlock(Vector3 position)
 {
     int chunkX = WorldToChunk(position.x);
-    int chunkY = WorldToChunk(position.y);
     int chunkZ = WorldToChunk(position.z);
 
-    return GetChunkAt(chunkX, chunkY, chunkZ);
+    return GetChunkAt(chunkX, chunkZ);
 }
 
 
 // =====================================================
 // CREATE CHUNKS
 // =====================================================
-
 void CreateChunks()
 {
     chunks.clear();
@@ -216,23 +216,16 @@ void CreateChunks()
     int minChunkX = INT_MAX;
     int maxChunkX = INT_MIN;
 
-    int minChunkY = INT_MAX;
-    int maxChunkY = INT_MIN;
-
     int minChunkZ = INT_MAX;
     int maxChunkZ = INT_MIN;
 
     for (const Block& block : blocks)
     {
         int chunkX = WorldToChunk(block.position.x);
-        int chunkY = WorldToChunk(block.position.y);
         int chunkZ = WorldToChunk(block.position.z);
 
         minChunkX = std::min(minChunkX, chunkX);
         maxChunkX = std::max(maxChunkX, chunkX);
-
-        minChunkY = std::min(minChunkY, chunkY);
-        maxChunkY = std::max(maxChunkY, chunkY);
 
         minChunkZ = std::min(minChunkZ, chunkZ);
         maxChunkZ = std::max(maxChunkZ, chunkZ);
@@ -240,21 +233,17 @@ void CreateChunks()
 
     for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++)
     {
-        for (int chunkY = minChunkY; chunkY <= maxChunkY; chunkY++)
+        for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++)
         {
-            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++)
-            {
-                Chunk chunk{};
+            Chunk chunk{};
 
-                chunk.x = chunkX;
-                chunk.y = chunkY;
-                chunk.z = chunkZ;
+            chunk.x = chunkX;
+            chunk.z = chunkZ;
 
-                chunk.mesh = { 0 };
-                chunk.dirty = true;
+            chunk.mesh = { 0 };
+            chunk.dirty = true;
 
-                chunks.push_back(chunk);
-            }
+            chunks.push_back(chunk);
         }
     }
 }
@@ -373,9 +362,9 @@ void GenerateTerrain(
                     );
 
             // Make sure there is always terrain.
-            height = std::max(height, -2);
+            height = std::max(height, -10);
 
-            for (int y = -2; y <= height; y++)
+            for (int y = -10; y <= height; y++)
             {
                 std::string blockType;
 
@@ -389,10 +378,15 @@ void GenerateTerrain(
                     // Dirt
                     blockType = "dirt";
                 }
-                else
+                else if (y != -10)
                 {
                     // Stone
                     blockType = "stone";
+                }
+                else 
+                {
+                    // Bedrock
+                    blockType = "bedrock";
                 }
 
                 blocks.push_back({
@@ -571,7 +565,6 @@ void MarkChunkDirty(Vector3 position)
 void MarkNeighborChunksDirty(Vector3 position)
 {
     int localX = GetLocalBlockCoordinate(position.x);
-    int localY = GetLocalBlockCoordinate(position.y);
     int localZ = GetLocalBlockCoordinate(position.z);
 
     Chunk* chunk = GetChunkContainingBlock(position);
@@ -583,7 +576,7 @@ void MarkNeighborChunksDirty(Vector3 position)
     if (localX == 0)
     {
         Chunk* neighbor =
-            GetChunkAt(chunk->x - 1, chunk->y, chunk->z);
+            GetChunkAt(chunk->x - 1, chunk->z);
 
         if (neighbor != nullptr)
             neighbor->dirty = true;
@@ -592,36 +585,16 @@ void MarkNeighborChunksDirty(Vector3 position)
     if (localX == CHUNK_SIZE - 1)
     {
         Chunk* neighbor =
-            GetChunkAt(chunk->x + 1, chunk->y, chunk->z);
+            GetChunkAt(chunk->x + 1, chunk->z);
 
         if (neighbor != nullptr)
             neighbor->dirty = true;
     }
-
-
-    if (localY == 0)
-    {
-        Chunk* neighbor =
-            GetChunkAt(chunk->x, chunk->y - 1, chunk->z);
-
-        if (neighbor != nullptr)
-            neighbor->dirty = true;
-    }
-
-    if (localY == CHUNK_SIZE - 1)
-    {
-        Chunk* neighbor =
-            GetChunkAt(chunk->x, chunk->y + 1, chunk->z);
-
-        if (neighbor != nullptr)
-            neighbor->dirty = true;
-    }
-
 
     if (localZ == 0)
     {
         Chunk* neighbor =
-            GetChunkAt(chunk->x, chunk->y, chunk->z - 1);
+            GetChunkAt(chunk->x, chunk->z - 1);
 
         if (neighbor != nullptr)
             neighbor->dirty = true;
@@ -630,7 +603,7 @@ void MarkNeighborChunksDirty(Vector3 position)
     if (localZ == CHUNK_SIZE - 1)
     {
         Chunk* neighbor =
-            GetChunkAt(chunk->x, chunk->y, chunk->z + 1);
+            GetChunkAt(chunk->x, chunk->z + 1);
 
         if (neighbor != nullptr)
             neighbor->dirty = true;
@@ -904,8 +877,8 @@ Mesh GenerateChunkMesh(Chunk& chunk)
     float minX = chunk.x * CHUNK_SIZE;
     float maxX = minX + CHUNK_SIZE - 1;
 
-    float minY = chunk.y * CHUNK_SIZE;
-    float maxY = minY + CHUNK_SIZE - 1;
+    float minY = -10;
+    float maxY = minY + 365.0f - 1;
 
     float minZ = chunk.z * CHUNK_SIZE;
     float maxZ = minZ + CHUNK_SIZE - 1;
@@ -1247,15 +1220,14 @@ void RebuildAllDirtyChunks()
 bool IsChunkVisible(const Chunk& chunk, const Camera3D& camera)
 {
     float minX = chunk.x * CHUNK_SIZE - 0.5f;
-    float minY = chunk.y * CHUNK_SIZE - 0.5f;
     float minZ = chunk.z * CHUNK_SIZE - 0.5f;
 
     float maxX = (chunk.x + 1) * CHUNK_SIZE - 0.5f;
-    float maxY = (chunk.y + 1) * CHUNK_SIZE - 0.5f;
+    float maxY = 365.0f - 0.5f;
     float maxZ = (chunk.z + 1) * CHUNK_SIZE - 0.5f;
 
     BoundingBox bounds = {
-        { minX, minY, minZ },
+        { minX, -10, minZ },
         { maxX, maxY, maxZ }
     };
 
@@ -1436,6 +1408,29 @@ void DrawChunkBorders()
 
 void AddBlock(Vector3 position, const std::string& blockType)
 {
+    // ============================================
+    // WORLD HEIGHT LIMIT
+    // ============================================
+
+    if (position.y < MIN_BUILD_Y ||
+        position.y > MAX_BUILD_Y - 11)
+    {
+        return;
+    }
+
+    // ============================================
+    // DON'T PLACE INSIDE AN EXISTING BLOCK
+    // ============================================
+
+    if (IsBlockAt(position))
+    {
+        return;
+    }
+
+    // ============================================
+    // ADD BLOCK
+    // ============================================
+
     Block* oldData = blocks.empty() ? nullptr : blocks.data();
 
     blocks.push_back({
@@ -1443,8 +1438,8 @@ void AddBlock(Vector3 position, const std::string& blockType)
         blockType
         });
 
-    // push_back can reallocate the vector,
-    // which invalidates every Block*.
+    // push_back may reallocate the vector,
+    // invalidating every Block* in blockLookup.
     if (blocks.data() != oldData)
     {
         BuildBlockLookup();
@@ -1454,11 +1449,15 @@ void AddBlock(Vector3 position, const std::string& blockType)
         Block* block = &blocks.back();
 
         blockLookup[{
-            (int)position.x,
-                (int)position.y,
-                (int)position.z
+            (int)floorf(position.x),
+                (int)floorf(position.y),
+                (int)floorf(position.z)
         }] = block;
     }
+
+    // ============================================
+    // UPDATE CHUNKS
+    // ============================================
 
     MarkChunkDirty(position);
     MarkNeighborChunksDirty(position);
