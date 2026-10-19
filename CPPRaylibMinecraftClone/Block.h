@@ -11,7 +11,8 @@ struct Block
 
 struct RaycastHit
 {
-    Block* block;
-    Vector3 position;
-    Vector3 normal;
+    bool hit = false;
+    Vector3 blockPosition = { 0 };
+    Vector3 normal = { 0 };
+    std::string blockType;
 };
